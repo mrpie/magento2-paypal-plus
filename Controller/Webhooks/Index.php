@@ -14,12 +14,14 @@
 
 namespace Iways\PayPalPlus\Controller\Webhooks;
 
+use Magento\Framework\App\CsrfAwareActionInterface;
+use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Unified IPN controller for all supported PayPal methods
  */
-class Index extends \Magento\Framework\App\Action\Action
+class Index extends \Magento\Framework\App\Action\Action implements CsrfAwareActionInterface
 {
     /**
      * @var \Psr\Log\LoggerInterface
@@ -35,6 +37,24 @@ class Index extends \Magento\Framework\App\Action\Action
      * @var \Iways\PayPalPlus\Model\ApiFactory
      */
     protected $_apiFactory;
+
+    /**
+     * @param \Magento\Framework\App\RequestInterface $request
+     * @return bool|null
+     */
+    public function validateForCsrf(\Magento\Framework\App\RequestInterface $request): ?bool
+    {
+        return true;
+    }
+
+    /**
+     * @param \Magento\Framework\App\RequestInterface $request
+     * @return InvalidRequestException|null
+     */
+    public function createCsrfValidationException(\Magento\Framework\App\RequestInterface $request): ?InvalidRequestException
+    {
+        return null;
+    }
 
     /**
      * @param \Magento\Framework\App\Action\Context $context
@@ -78,5 +98,7 @@ class Index extends \Magento\Framework\App\Action\Action
             $this->_logger->critical($e);
             $this->getResponse()->setStatusHeader(503, '1.1', 'Service Unavailable')->sendResponse();
         }
+
+        return;
     }
 }
